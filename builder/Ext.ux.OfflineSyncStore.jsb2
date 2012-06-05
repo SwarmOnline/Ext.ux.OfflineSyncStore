@@ -1,0 +1,21 @@
+{
+    "projectName": "Ext.ux.OfflineSyncStore",
+    "deployDir": "",
+    "licenseText": "Ext.ux.OfflineSyncStore",
+    "pkgs": [
+        {
+            "name": "Ext.ux.OfflineSyncStore",
+            "file": "Ext.ux.OfflineSyncStore-min.js",
+            "isDebug": false,
+            "fileIncludes": [
+				{
+					"text": "Ext.ux.OfflineSyncStore.js",
+                    "path": "../"
+				}
+            ] 
+        } 
+    ],
+    "resources": [
+        
+    ]
+}
