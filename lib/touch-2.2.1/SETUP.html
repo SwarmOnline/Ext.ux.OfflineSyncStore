@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<head>
+<style>
+h1 {font-family: Calibri; font-size: 18pt;}
+h2 {font-family: Calibri; font-size: 14pt;}
+h3 {font-family: Calibri; font-size: 12pt;}
+body {font-family: Calibri; font-size: 11pt;}
+</style>
+</head>
+
+<body style="width: 750px">
+	<a href="http://sencha.com"><span style="left: 50px"></span><img src="SenchaLogo.png" width="110" height="40" /></a>
+<h1>Sencha Touch Setup Guide</h1>
+<p><b>Topics:</b></p>
+<ul>
+	<li><a href="#Intro">Introduction</a></li>
+	<li><a href="#Install">Installing Sencha Touch</a></li>
+	<li><a href="#Info">Sencha Touch Information</a></li>
+</ul>
+<a name="Intro"></a>
+<h2>Introduction</h2>
+<p>Sencha Touch, a high-performance HTML5 mobile application framework, is the cornerstone 
+	of the Sencha HTML5 platform. Built for enabling world-class user experiences, 
+	Sencha Touch is the only framework that enables developers to build powerful apps 
+	that work on iOS, Android, BlackBerry, Windows Phone, and Microsoft Surface. 
+	<br>Learn more at <a href="http://docs.sencha.com/touch/2.2.0/#!/guide/whats_new">What's New</a>.</p>
+
+<a name="Install"></a>
+<h2>Installing Sencha Touch</h2>
+<p>To install Sencha Touch:</p>
+<ol>
+	<li>Download <a href="http://www.oracle.com/technetwork/java/javase/downloads/jre7-downloads-1880261.html">Java Runtime Environment</a> 
+	version 1.7 (1.6 also works, but 1.7 is best). Sencha Cmd is written in Java and needs the JRE to run.</li>
+	<li>Download <a href="http://www.sencha.com/products/sencha-cmd/download">Sencha Cmd</a>.</li>
+	<li>Download <a href="http://www.ruby-lang.org/en/downloads/">Ruby version 1.9.3</a> 
+		(Ruby version 2.0 doesn't work correctly with Sencha Cmd).
+		<ul>
+		<li><b>Windows</b>: Download Ruby 1.9.3.n from <a href="http://rubyinstaller.org/downloads/">rubyinstaller.org</a>. 
+		Download the RubyInstaller .exe file and run it.</li>
+		<li><b>Mac OS</b>: Ruby is pre-installed. You can test which version 
+		you have with the <b>ruby -v</b> command. If you have version 2.0, 
+		download the <a href="https://rvm.io/">Ruby version manager</a> (rvm) and use this command to
+		download and install Ruby:&nbsp;<b>rvm install 1.9.3 --with-gcc=clang</b><br>
+		Set your PATH variable to point to the Ruby 1.9.3 install directory.</li>
+ 		<li><b>Ubuntu</b>: Use <b>sudo apt-get install ruby1.9.3</b> to download and install Ruby 1.9.3.</li>
+		</ul>
+	</li>
+	<li>If you are using Windows and running the IIS web server, add "application/x-json" as a MIME type 
+		for Sencha Touch to work properly. For information on adding this MIME type, see 
+		this <a href="http://stackoverflow.com/a/1121114/273985">Stackoverflow article</a>.</li>
+	<li>For optimal debugging, use a modern web browser such as 
+		<a href="https://www.google.com/intl/en/chrome/browser">Chrome</a> 
+		or <a href="http://www.apple.com/safari/">Safari</a>.</li>		
+	<li>Create a project directory where you want to serve applications and ensure the directory is writable:<br>
+		Windows: Right-click the directory name, click <b>Properties</b>, and uncheck <b>Read-only</b> 
+		on the General tab.<br>
+		Mac or Ubuntu: Use <b>chmod o+w</b> <i>&lt;dir_name&gt;</i></li>
+	<li>Copy the Sencha Touch unzipped directory to the directory where you are serving applications.</li>
+	<li>Start the Sencha Cmd web server to serve the applications directory: 
+		<br><b>sencha fs web -port 8000 start -map</b> <i>&lt;dir_name&gt;</i><br> 
+		(You can use any port number. The default is 1841.) You can access the Sencha Cmd web server using: 
+		<i>http://localhost:8000/&lt;dir_name&gt;/&lt;app_name&gt;</i></li>
+</ol>	
+
+<p><b>Note</b> If you need support for server-side scripting or PHP, 
+you can get another web server such as <a href="http://www.apachefriends.org/en/xampp.html">XAMPP</a>. 
+If you use XAMPP, put the files you want to serve in the <i>htdocs</i> directory.</p>	
+
+<a name="Info"></a>
+<h2>Sencha Touch Information</h2>
+<ul>
+<li><a href="http://docs.sencha.com/">Sencha Documentation</a></li>
+<li><a href="release-notes.html">Sencha Touch Release Notes</a></li>
+<li><a href="examples/">Sencha Touch Examples</a></li>
+<li><a href="http://www.sencha.com/products/touch-bundle/">Sencha Touch Bundle</a></li>
+<li><a href="http://www.sencha.com/training/">Sencha Training</a></li>
+<li><a href="http://www.sencha.com/support/">Sencha Support</a></li>
+<li><a href="http://www.sencha.com/">Sencha.com</a></li>
+</ul>
+</body>
+</html>
