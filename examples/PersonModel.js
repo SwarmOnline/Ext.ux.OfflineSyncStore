@@ -1,20 +1,27 @@
 Ext.define('Person', {
-	extend: 'Ext.data.Model',
+    extend: 'Ext.data.Model',
 
-	config: {
-		idProperty: 'PersonID',
-		fields: [{
-			name: 'PersonID',
-			type: 'int'
-		}, {
-			name: 'FirstName',
-			type: 'string'
-		}, {
-			name: 'LastName',
-			type: 'string'
-		}, {
-			name: 'Email',
-			type: 'string'
-		}]
-	}
+    requires: ['Ext.data.identifier.Uuid'],
+
+    config: {
+        idProperty: 'PersonID',
+        identifier: 'uuid',
+        fields: [
+            {
+                name: 'PersonID'
+            },
+            {
+                name: 'FirstName',
+                type: 'string'
+            },
+            {
+                name: 'LastName',
+                type: 'string'
+            },
+            {
+                name: 'Email',
+                type: 'string'
+            }
+        ]
+    }
 });
