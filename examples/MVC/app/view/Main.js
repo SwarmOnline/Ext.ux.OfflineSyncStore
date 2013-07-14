@@ -44,6 +44,29 @@ Ext.define('Example.view.Main', {
                         posterUrl: 'http://b.vimeocdn.com/ts/261/062/261062119_640.jpg'
                     }
                 ]
+            },
+            {
+                title: 'People',
+                layout: 'fit',
+                items: [
+                    {
+                        docked: 'top',
+                        xtype: 'titlebar',
+                        title: 'People',
+                        items: [
+                            {
+                                xtype: 'button',
+                                iconCls: 'add',
+                                action: 'add'
+                            }
+                        ]
+                    },
+                    {
+                        xtype: 'personlist'
+                    }
+                ]
+
+
             }
         ]
     }

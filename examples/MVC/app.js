@@ -9,10 +9,17 @@ Ext.application({
     name: 'Example',
 
     requires: [
-        'Ext.MessageBox'
+        'Ext.MessageBox',
+        'Ext.data.proxy.LocalStorage'
     ],
 
-    views: ['Main'],
+    controllers: ['People'],
+
+    models: ['Person'],
+
+    views: ['Main', 'PersonList'],
+
+    stores: ['Person'],
 
     icon: {
         '57': 'resources/icons/Icon.png',
@@ -32,7 +39,7 @@ Ext.application({
         '1496x2048': 'resources/startup/1496x2048.png'
     },
 
-    launch: function() {
+    launch: function () {
         // Destroy the #appLoadingIndicator element
         Ext.fly('appLoadingIndicator').destroy();
 
@@ -40,11 +47,11 @@ Ext.application({
         Ext.Viewport.add(Ext.create('Example.view.Main'));
     },
 
-    onUpdated: function() {
+    onUpdated: function () {
         Ext.Msg.confirm(
             "Application Update",
             "This application has just successfully been updated to the latest version. Reload now?",
-            function(buttonId) {
+            function (buttonId) {
                 if (buttonId === 'yes') {
                     window.location.reload();
                 }
