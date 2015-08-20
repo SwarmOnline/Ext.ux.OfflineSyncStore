@@ -122,13 +122,35 @@ Ext.define('Ext.ux.OfflineSyncStore', {
 			if(removedRecords.length > 0){
 				this.storeRemoved(removedRecords);
 			}
-
-			if(this.doAutoServerSync()){
-				this.syncServer();
-			}
 		}
 
 		return syncRecords;
+	},
+	
+	/**
+	 * This is called once the batch operation completed successfully.
+	 * If we're in local mode and autoServerSync is true then we can move on with the server sync
+	 * @method
+	 * @private
+	 * @returns {void}
+	 */
+	onBatchComplete : function() {
+		this.callParent(arguments);
+		if(this.isLocalMode() && this.doAutoServerSync()) {
+			this.syncServer();
+		}
+	},
+	
+	/**
+	 * This is called once the batch operation failed.
+	 * We do nothign special here, we just fire a custom event 'onbatchexception' to notify exception.
+	 * @method
+	 * @private
+	 * @returns {void}
+	 */
+	onBatchException : function(batch, operation) {
+		this.callParent(arguments);
+		this.fireEvent('onbatchexception', batch, operation);
 	},
 
 	/**
