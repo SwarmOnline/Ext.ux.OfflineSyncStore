@@ -131,23 +131,32 @@ Ext.define('Ext.ux.OfflineSyncStore', {
 	 * @private
 	 * @returns {void}
 	 */
-	onBatchComplete : function() {
+	onBatchComplete: function(batch) {
 		this.callParent(arguments);
-		if(this.isLocalMode() && this.doAutoServerSync()) {
-			this.syncServer();
+		if (this.isLocalMode()) {
+			this.fireEvent('localsynccomplete', this, batch);
+			if (this.doAutoServerSync()) {
+				this.syncServer();
+			}
+		} else {
+			this.fireEvent('remotesynccomplete', this, batch);
 		}
 	},
 	
 	/**
 	 * This is called once the batch operation failed.
-	 * We do nothign special here, we just fire a custom event 'onbatchexception' to notify exception.
+	 * We do nothign special here, we just fire event to notify exception.
 	 * @method
 	 * @private
 	 * @returns {void}
 	 */
-	onBatchException : function(batch, operation) {
+	onBatchException: function(batch, operation) {
 		this.callParent(arguments);
-		this.fireEvent('onbatchexception', batch, operation);
+		var event = 'remotesyncexception';
+		if (this.isLocalMode()) {
+			event = 'localsyncexception';
+		}
+		this.fireEvent(event, this, batch, operation);
 	},
 
 	/**
@@ -407,6 +416,20 @@ Ext.define('Ext.ux.OfflineSyncStore', {
 	},
 
 	/**
+	 * Clears all localStorage entries.
+	 * @method
+	 * @public
+	 * @return {void}
+	 */
+	clearCollections : function() {
+		var oss = Ext.ux.OfflineSyncStore;
+		var keys = [oss.REMOVED, oss.UPDATED, oss.CREATED];
+		keys.forEach(function(key) {
+			this.clearModifiedCollection(key);
+		}, this);
+	},
+
+	/**
 	 * Returns an array of data items retrieved from the localStorage based on the specified key and the Local Proxy's
 	 * ID property.
 	 * An empty array is returned if no value is found.
@@ -479,7 +502,7 @@ Ext.define('Ext.ux.OfflineSyncStore', {
 	 * @param successful
 	 * @return {void}
 	 */
-	onServerLoad: function(store, records, successful) {
+	onServerLoad : function(store, records, successful) {
 		if (successful) {
 			// If load was a success we must populate the Local Proxy with the new data
 			this._proxy = this.getLocalProxy();
@@ -492,8 +515,11 @@ Ext.define('Ext.ux.OfflineSyncStore', {
 				record.setDirty(true);
 			});
 
-			// disable tracking so the server won't try and resave the data being synced
-			this.disableTrackLocalSync();
+			var trackLocalSyncMem = this.getTrackLocalSync();
+			if (trackLocalSyncMem) {
+				// disable tracking so the server won't try and resave the data being synced
+				this.disableTrackLocalSync();
+			}
 
 			// Save the changes with the Local Proxy
 			this.sync();
@@ -503,10 +529,11 @@ Ext.define('Ext.ux.OfflineSyncStore', {
 				record.commit();
 			});
 
-			// enable the tracking so any subsequent syncs are tracked
-			this.enableTrackLocalSync();
-		}
-		else {
+			if (trackLocalSyncMem) {
+				// enable the tracking so any subsequent syncs are tracked
+				this.enableTrackLocalSync();
+			}
+		} else {
 			// Go back to the Local Proxy if our load fails
 			this.loadLocal();
 		}
