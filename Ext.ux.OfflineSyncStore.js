@@ -131,7 +131,7 @@ Ext.define('Ext.ux.OfflineSyncStore', {
 	 * @private
 	 * @returns {void}
 	 */
-	onBatchComplete: function(batch) {
+	onBatchComplete : function(batch) {
 		this.callParent(arguments);
 		if (this.isLocalMode()) {
 			this.fireEvent('localsynccomplete', this, batch);
@@ -139,10 +139,11 @@ Ext.define('Ext.ux.OfflineSyncStore', {
 				this.syncServer();
 			}
 		} else {
+			this.resetPhantomForCreatedRecords(batch);
 			this.fireEvent('remotesynccomplete', this, batch);
 		}
 	},
-	
+
 	/**
 	 * This is called once the batch operation failed.
 	 * We do nothign special here, we just fire event to notify exception.
@@ -150,13 +151,29 @@ Ext.define('Ext.ux.OfflineSyncStore', {
 	 * @private
 	 * @returns {void}
 	 */
-	onBatchException: function(batch, operation) {
+	onBatchException : function(batch, operation) {
 		this.callParent(arguments);
-		var event = 'remotesyncexception';
 		if (this.isLocalMode()) {
-			event = 'localsyncexception';
+			this.fireEvent('localsyncexception', this, batch, operation);
+		} else {
+			this.resetPhantomForCreatedRecords(batch);
+			this.fireEvent('remotesyncexception', this, batch, operation);
 		}
-		this.fireEvent(event, this, batch, operation);
+	},
+
+	/**
+	 * This method is used to reset phantom for created records once the batch is completed
+	 * @private
+	 * @returns {void}
+	 */
+	resetPhantomForCreatedRecords : function(batch) {
+		Ext.each(batch.operations, function(operation) {
+			if (operation.getAction() === "create") {
+				Ext.each(operation.getRecords(), function(record) {
+					record.phantom = false;
+				}, this);
+			}
+		}, this);
 	},
 
 	/**
@@ -184,7 +201,13 @@ Ext.define('Ext.ux.OfflineSyncStore', {
 			// This is required so the store can map up the returned records to the ones in the store to update IDs etc.
 			// When we do a local save a new ID gets generated for the record which we don't want to send to the server.
 			for(var i = 0; i < toCreate.length; i++){
-				toCreate[i].data[this.getModel().getIdProperty()] = toCreate[i].id;
+				var record = toCreate[i];
+				record.data[this.getModel().getIdProperty()] = record.id;
+
+				// Once a new record has been saved to local db, the phantom property is set to false.
+				// As a consequence when we sync with server the phantom property is still false and the POST url has the id in the path (ie POST /model/ext-record-123) and this is wrong.
+				// Therefore we force phantom to be true (phantom is set back to false in "resetPhantomForCreatedRecords")
+				record.phantom = true;
 			}
 
 			operations.create = toCreate;
