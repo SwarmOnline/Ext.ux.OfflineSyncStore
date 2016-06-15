@@ -65,7 +65,7 @@ Ext.define('Ext.ux.OfflineSyncStore', {
 	 * @return {void}
 	 */
 	loadLocal: function(options, scope){
-		this._proxy = this.getLocalProxy();
+		this.setProxy(this.getLocalProxy());
 
 		this.load(options, scope, true);
 	},
@@ -79,7 +79,7 @@ Ext.define('Ext.ux.OfflineSyncStore', {
 	 * @return {void}
 	 */
 	loadServer: function(options, scope){
-		this._proxy = this.getServerProxy();
+		this.setProxy(this.getServerProxy());
 
 		this.on({
 			load: {
@@ -101,13 +101,11 @@ Ext.define('Ext.ux.OfflineSyncStore', {
 	 * @returns {Object}
 	 */
 	sync: function(){
-		this._proxy = this.getLocalProxy();
+		this.setProxy(this.getLocalProxy());
 
-		var syncRecords = this.callParent(arguments);
-
-		var createdRecords = syncRecords.added,
-			updatedRecords = syncRecords.updated,
-			removedRecords = syncRecords.removed;
+		var createdRecords = this.getNewRecords(),
+			updatedRecords = this.getUpdatedRecords(),
+			removedRecords = this.getRemovedRecords();
 
 		if(this.getTrackLocalSync()){
 			if(createdRecords.length > 0){
@@ -121,7 +119,7 @@ Ext.define('Ext.ux.OfflineSyncStore', {
 			}
 		}
 
-		return syncRecords;
+		return this.callParent(arguments);
 	},
 	
 	/**
@@ -167,9 +165,9 @@ Ext.define('Ext.ux.OfflineSyncStore', {
 	 * @public
 	 * @return {Object} An object containing 3 properties containing the modified records - added, updated, removed.
 	 */
-	syncServer: function(){
+	syncServer: function(options){
 
-		this._proxy = this.getServerProxy();
+		this.setProxy(this.getServerProxy());
 
 		var me = this,
 			operations = {},
@@ -184,7 +182,7 @@ Ext.define('Ext.ux.OfflineSyncStore', {
 			// This is required so the store can map up the returned records to the ones in the store to update IDs etc.
 			// When we do a local save a new ID gets generated for the record which we don't want to send to the server.
 			for(var i = 0; i < toCreate.length; i++){
-				toCreate[i].data[this.getModel().getIdProperty()] = toCreate[i].id;
+				toCreate[i].data[this.getModel().idProperty] = toCreate[i].id;
 			}
 
 			operations.create = toCreate;
@@ -201,18 +199,18 @@ Ext.define('Ext.ux.OfflineSyncStore', {
 			needsSync = true;
 		}
 
-		if (needsSync && me.fireEvent('beforesync', this, operations) !== false) {
-			me.getProxy().batch({
+		if (needsSync && me.fireEvent('beforesync', operations) !== false) {
+			me.isSyncing = true;
+
+			options = options || {};
+
+			me.proxy.batch(Ext.apply(options, {
 				operations: operations,
 				listeners: me.getBatchListeners()
-			});
+			}));
 		}
 
-		return {
-			added: toCreate,
-			updated: toUpdate,
-			removed: toDestroy
-		};
+		return me;
 	},
 
 
@@ -246,7 +244,7 @@ Ext.define('Ext.ux.OfflineSyncStore', {
 			createdMergeCollection = [], // stores any data objects that exist in the 'created' collection and so must be merged in and then saved
 			updatedSaveCollection = [], // stores any data objects that DON'T exist in the 'created' collection and so must be saved in the 'updated' collection as normal
 			matched = false,
-			modelIDField = this.getModel().getIdProperty();
+			modelIDField = this.getModel().idProperty;
 
 		// find any records in the updated array that already exist in the 'created' collection and store them so they can be merged
 		for(var i = 0; i < updated.length; i++){
@@ -288,7 +286,7 @@ Ext.define('Ext.ux.OfflineSyncStore', {
 			updatedCollection = this.getModifiedCollection(Ext.ux.OfflineSyncStore.UPDATED),
 			removedSaveCollection = [], // stores any data objects that DON'T exist in the 'created' collection and so must be saved in the 'updated' collection as normal
 			createdMatched = false,
-			modelIDField = this.getModel().getIdProperty();
+			modelIDField = this.getModel().idProperty;
 
 		// find any records in the updated array that already exist in the 'created' and 'updated' collections and remove them
 		for(var i = 0; i < removed.length; i++){
@@ -458,7 +456,7 @@ Ext.define('Ext.ux.OfflineSyncStore', {
 			modifiedRecordsCollection = [];
 
 		for(var i = 0; i < modifiedCollection.length; i++){
-			var record = this.getById(modifiedCollection[i][this.getModel().getIdProperty()]);
+			var record = this.getById(modifiedCollection[i][this.getModel().idProperty]);
 
 			if(record){
 				modifiedRecordsCollection.push(record);
@@ -505,14 +503,14 @@ Ext.define('Ext.ux.OfflineSyncStore', {
 	onServerLoad : function(store, records, successful) {
 		if (successful) {
 			// If load was a success we must populate the Local Proxy with the new data
-			this._proxy = this.getLocalProxy();
+			this.setProxy(this.getLocalProxy());
 
 			// clear the existing data first
-			this._proxy.clear();
+			this.getProxy().clear();
 
 			// To ensure the Local Proxy identifies all the records as dirty (i.e. requiring to be saved) we mark them all as dirty
 			store.each(function(record) {
-				record.setDirty(true);
+				record.dirty = true;   // record.setDirty(true) is now deprecated;
 			});
 
 			var trackLocalSyncMem = this.getTrackLocalSync();
@@ -661,7 +659,7 @@ Ext.define('Ext.ux.OfflineSyncStore', {
 			l2 = array2.length,
 			present = false;
 
-		idKey = idKey || this.getModel().getIdProperty();
+		idKey = idKey || this.getModel().idProperty;
 
 		for(; i < l; i++){
 
